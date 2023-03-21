@@ -13,11 +13,15 @@ public class PlayerController : MonoBehaviour
 	private float jumpPower;
 
 	private new Rigidbody2D rigidbody;
+	private Animator animator;
+	private new SpriteRenderer renderer;
 	private Vector2 inputDir;
 
 	private void Awake()
 	{
 		rigidbody = GetComponent<Rigidbody2D>();
+		animator = GetComponent<Animator>();
+		renderer = GetComponent<SpriteRenderer>();
 	}
 
 	private void Update()
@@ -28,6 +32,11 @@ public class PlayerController : MonoBehaviour
 	private void OnMove(InputValue value)
 	{
 		inputDir = value.Get<Vector2>();
+		animator.SetFloat("MoveDirX", Mathf.Abs(inputDir.x));
+		if (inputDir.x > 0)
+			renderer.flipX = false;
+		else if (inputDir.x < 0)
+			renderer.flipX = true;
 	}
 
 	private void OnJump(InputValue value)
@@ -47,5 +56,15 @@ public class PlayerController : MonoBehaviour
 	private void Jump()
 	{
 		rigidbody.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
+	}
+
+	private void OnCollisionEnter2D(Collision2D collision)
+	{
+		animator.SetBool("IsGrounded", false);
+	}
+
+	private void OnCollisionExit2D(Collision2D collision)
+	{
+		animator.SetBool("IsGrounded", true);
 	}
 }
