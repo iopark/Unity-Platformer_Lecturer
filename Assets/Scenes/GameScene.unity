@@ -465,6 +465,9 @@ MonoBehaviour:
   maxSpeed: 3
   movePower: 3
   jumpPower: 10
+  groundMask:
+    serializedVersion: 2
+    m_Bits: 128
 --- !u!70 &380070273
 CapsuleCollider2D:
   m_ObjectHideFlags: 0
@@ -814,7 +817,7 @@ GameObject:
   - component: {fileID: 1930079247}
   - component: {fileID: 1930079249}
   - component: {fileID: 1930079248}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}

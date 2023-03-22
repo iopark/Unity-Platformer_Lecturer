@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -12,10 +13,14 @@ public class PlayerController : MonoBehaviour
 	[SerializeField]
 	private float jumpPower;
 
+	[SerializeField]
+	private LayerMask groundMask;
+
 	private new Rigidbody2D rigidbody;
 	private Animator animator;
 	private new SpriteRenderer renderer;
 	private Vector2 inputDir;
+	private bool isGrounded;
 
 	private void Awake()
 	{
@@ -27,6 +32,11 @@ public class PlayerController : MonoBehaviour
 	private void Update()
 	{
 		Move();
+	}
+
+	private void FixedUpdate()
+	{
+		GroundCheck();
 	}
 
 	private void OnMove(InputValue value)
@@ -41,7 +51,7 @@ public class PlayerController : MonoBehaviour
 
 	private void OnJump(InputValue value)
 	{
-		if (value.isPressed)
+		if (value.isPressed && isGrounded)
 			Jump();
 	}
 
@@ -58,13 +68,25 @@ public class PlayerController : MonoBehaviour
 		rigidbody.AddForce(Vector2.up * jumpPower, ForceMode2D.Impulse);
 	}
 
-	private void OnCollisionEnter2D(Collision2D collision)
+	private void GroundCheck()
 	{
-		animator.SetBool("IsGrounded", false);
-	}
+		Debug.DrawRay(transform.position, Vector2.down * 1.5f, Color.red);
+		RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, 1.5f, groundMask);
+		if (hit.collider != null)
+		{
+			isGrounded = true;
+			animator.SetBool("IsGrounded", true);
 
-	private void OnCollisionExit2D(Collision2D collision)
-	{
-		animator.SetBool("IsGrounded", true);
+			// Smooth landing
+			if (rigidbody.velocity.y < -3)
+			{
+				rigidbody.velocity = new Vector2(rigidbody.velocity.x, -3);
+			}
+		}
+		else
+		{
+			isGrounded = false;
+			animator.SetBool("IsGrounded", false);
+		}
 	}
 }
