@@ -3,12 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using UnityEngine;
 
-public class Mouse : MonoBehaviour
+public class Mouse : Monster
 {
-	private new Rigidbody2D rigidbody;
-	private Animator animator;
-	private new Collider2D collider;
-
 	private bool isDie = false;
 
 	[SerializeField]
@@ -17,13 +13,6 @@ public class Mouse : MonoBehaviour
 	private Transform groundCheckPosition;
 	[SerializeField]
 	private LayerMask groundLayer;
-
-	private void Awake()
-	{
-		rigidbody = GetComponent<Rigidbody2D>();
-		animator = GetComponent<Animator>();
-		collider = GetComponent<Collider2D>();
-	}
 
 	private void Update()
 	{
@@ -43,31 +32,19 @@ public class Mouse : MonoBehaviour
 
 	private void Turn()
 	{
-		transform.Rotate(Vector3.up, 180);	
+		transform.Rotate(Vector3.up, 180);
 	}
 
-	private void Die()
+	protected override void Die()
 	{
-		isDie = true;
-		rigidbody.velocity = Vector2.up * 3;
-		animator.SetBool("Die", true);
-		collider.enabled = false;
+		base.Die();
 
-		Destroy(gameObject, 3f);
+		isDie = true;
 	}
 
 	private bool IsGroundExist()
 	{
 		Debug.DrawRay(groundCheckPosition.position, Vector2.down, Color.red);
 		return Physics2D.Raycast(groundCheckPosition.position, Vector2.down, 1f, groundLayer);
-	}
-
-	private void OnCollisionEnter2D(Collision2D collision)
-	{
-		if (collision.gameObject.tag == "Player")
-		{
-			// TODO : 임시로 구현
-			Die();
-		}
 	}
 }
