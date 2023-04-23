@@ -21,6 +21,9 @@ public class PlayerController : MonoBehaviour
 	private new SpriteRenderer renderer;
 	private Vector2 inputDir;
 	private bool isGrounded;
+    private bool isHited;
+
+    private Coroutine moveRoutine;
 
 	private void Awake()
 	{
@@ -29,10 +32,10 @@ public class PlayerController : MonoBehaviour
 		renderer = GetComponent<SpriteRenderer>();
 	}
 
-	private void Update()
+	private void Start()
 	{
-		Move();
-	}
+        moveRoutine = StartCoroutine(MoveRoutine());
+    }
 
 	private void FixedUpdate()
 	{
@@ -42,25 +45,18 @@ public class PlayerController : MonoBehaviour
 	private void OnMove(InputValue value)
 	{
 		inputDir = value.Get<Vector2>();
-		animator.SetFloat("MoveDirX", Mathf.Abs(inputDir.x));
-		if (inputDir.x > 0)
-			renderer.flipX = false;
-		else if (inputDir.x < 0)
-			renderer.flipX = true;
 	}
 
 	private void OnJump(InputValue value)
 	{
-		if (value.isPressed && isGrounded)
-			Jump();
-	}
+        if (!value.isPressed)
+            return;
+        if (!isGrounded)
+            return;
+        if (isHited)
+            return;
 
-	private void Move()
-	{
-		if (inputDir.x < 0 && rigidbody.velocity.x > -maxSpeed)
-			rigidbody.AddForce(Vector2.right * inputDir.x * movePower);
-		else if (inputDir.x > 0 && rigidbody.velocity.x < maxSpeed)
-			rigidbody.AddForce(Vector2.right * inputDir.x * movePower);
+		Jump();
 	}
 
 	private void Jump()
@@ -89,4 +85,39 @@ public class PlayerController : MonoBehaviour
 			animator.SetBool("IsGrounded", false);
 		}
 	}
+
+    private IEnumerator MoveRoutine()
+    {
+        while (true)
+        {
+            if (inputDir.x < 0 && rigidbody.velocity.x > -maxSpeed)
+                rigidbody.AddForce(Vector2.right * inputDir.x * movePower);
+            else if (inputDir.x > 0 && rigidbody.velocity.x < maxSpeed)
+                rigidbody.AddForce(Vector2.right * inputDir.x * movePower);
+
+            animator.SetFloat("MoveDirX", Mathf.Abs(inputDir.x));
+            if (inputDir.x > 0)
+                renderer.flipX = false;
+            else if (inputDir.x < 0)
+                renderer.flipX = true;
+
+            yield return null;
+        }
+    }
+
+    public void Hit()
+    {
+        StartCoroutine(HitRoutine());
+    }
+
+    private IEnumerator HitRoutine()
+    {
+        StopCoroutine(moveRoutine);
+        animator.SetBool("IsHit", true);
+        isHited = true;
+        yield return new WaitForSeconds(1f);
+        animator.SetBool("IsHit", false);
+        isHited = false;
+        moveRoutine = StartCoroutine(MoveRoutine());
+    }
 }

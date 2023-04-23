@@ -31,8 +31,19 @@ public class Monster : MonoBehaviour
 	{
 		if (collision.gameObject.tag == "Player")
 		{
-			// TODO : 임시로 구현
-			Die();
+            PlayerController playerController = collision.gameObject.GetComponent<PlayerController>();
+            Rigidbody2D playerRigidbody = playerController.GetComponent<Rigidbody2D>();
+            if (playerController.transform.position.y - 0.8f > transform.position.y)
+            {
+                playerRigidbody.velocity = new Vector2(playerRigidbody.velocity.x, 10);
+                Die();
+            }
+            else
+            {
+                int dirX = playerController.transform.position.x < transform.position.x ? -1 : 1;
+                playerRigidbody.velocity = new Vector2(dirX * 3, 8);
+                playerController.Hit();
+            }
 		}
 	}
 }
